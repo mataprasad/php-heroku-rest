@@ -25,5 +25,9 @@ $app->post('/api/register', function (Request $request) use ($app) {
     return $app->json($post, 201);
 });
 
+$app->get('/', function (Request $request) use ($app) {
+    return $app->json("I am up and running.", 200);
+});
+
 
 $app->run();
