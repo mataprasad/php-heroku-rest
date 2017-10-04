@@ -53,4 +53,3 @@ function SAVE_UPLOADED_FILE($input_file_name, $target_file, $MAX_FILE_SIZE = 500
     }
 }
 
-?>

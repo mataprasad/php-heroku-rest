@@ -59,4 +59,3 @@ function GET_GUID() {
     return strtolower($uuid);
 }
 
-?>

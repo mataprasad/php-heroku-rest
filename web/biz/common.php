@@ -1,4 +1,3 @@
-
 <?php
 function getDb(){
     //return new ezSQL_mysqli(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
@@ -15,4 +14,3 @@ function dbTest() {
     }
     return $result;
 }
-
