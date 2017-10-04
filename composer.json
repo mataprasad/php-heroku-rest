@@ -1,6 +1,7 @@
 {
     "require": {
         "silex/silex": "^2.0.4",
+        "zircote/swagger-php": "^2.0",
         "ext-sqlite3": "*"
     }
 }
