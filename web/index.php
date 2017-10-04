@@ -17,20 +17,17 @@ $app->before(function (Request $request) {
 });
 
 $app->get('/', function (Request $request) use ($app) {
-    dbTest();
+    //dbTest();
     return $app->json("I am up and running. Current Time at Server : ".date(DATE_ATOM), 200);
 });
 
 //-------------- POST METHODS --------------
 $app->post('/api/register', function (Request $request) use ($app) {
-    $post = array(
-        'title' => $request->request->get('title'),
-        'body'  => $request->request->get('body'),
-    );
+    
+    $pay_load = $request->request->get('pay_load');
+    $headers = $request->headers->all();
 
-    $post['id'] = rand();
-
-    return $app->json($post, 200);
+    return $app->json($pay_load." ".($headers["authorization"][0]), 200);
 });
 
 $app->post('/api/login', function (Request $request) use ($app) {
