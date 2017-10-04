@@ -9,7 +9,22 @@ use Symfony\Component\HttpFoundation\Response;
 
 $app = new Silex\Application();
 
-$app->before(function (Request $request) {
+$app->before(function (Request $request) use ($app) {
+    $allow_access=true;
+    $headers = $request->headers->all();
+    if (!($request->getPathInfo()=="/api/register" || $request->getPathInfo()=="/")) {
+        if (!isset($headers["authorization"])) {
+            $allow_access=false;
+        } else {
+            $auth = $headers["authorization"][0];
+            if ($auth==null || $auth=="") {
+                $allow_access=false;
+            }
+        }
+        if (!$allow_access) {
+            return $app->json("UnAuthorized", 400);
+        }
+    }
     if (0 === strpos($request->headers->get('Content-Type'), 'application/json')) {
         $data = json_decode($request->getContent(), true);
         $request->request->replace(is_array($data) ? $data : array());
