@@ -19,7 +19,7 @@ function dbTest() {
 function getEmployeeByEmployeeId($emp_id) {
     $db = getDb();
 
-    $query = "SELECT * FROM DtEmployee WHERE employeeid='1045';";
+    $query = "SELECT * FROM DtEmployee WHERE employeeid='".$emp_id."';";
     $result = $db->get_row($query);
     return $result;
 }

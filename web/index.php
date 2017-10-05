@@ -47,6 +47,8 @@ $app->before(function (Request $request) use ($app) {
 
 $app->get('/', function (Request $request) use ($app) {
     
+    $mcrypt = new MCrypt();
+    $mcrypt->decrypt("mata");
    
     return $app->json("I am up and running. Current Time at Server : ".date(DATE_ATOM), 200);
 });
@@ -67,12 +69,12 @@ $app->post('/api/register', function (Request $request) use ($app) {
        
     $emp=getEmployeeByEmployeeId($model->employeeId);
     //var_dump($emp);
-    if ($emp && $emp->EmployeeID==$model->employeeId) {
+    /*if ($emp!=null && $emp->EmployeeID==$model->employeeId) {
         
     } else {
         return $app->json(errorRespone("Employee id '".$model->employeeId."' is not available in the system."), 400);
-    }
-    return $app->json(successRespone(null, "Created Successfully."), 200);
+    }*/
+    return $app->json(successRespone(null, "Created Successfully.".$emp->ID), 200);
 });
 
 /**

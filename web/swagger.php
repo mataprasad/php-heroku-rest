@@ -1,4 +1,5 @@
 <?php
+phpinfo();
  require('../vendor/autoload.php');
  $swagger = \Swagger\scan('./');
  header('Content-Type: application/json');
