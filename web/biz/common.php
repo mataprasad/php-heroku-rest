@@ -7,10 +7,19 @@ function getDb(){
 function dbTest() {
     $db = getDb();
 
-    $query = "SELECT * FROM DtEmployee;";
-    $result = $db->get_results($query);
+    $query = "SELECT * FROM DtEmployee WHERE employeeid='1045';";
+    $result = $db->get_row($query);
+    //$result = $db->get_results($query);
     if (APP_DEBUG) {
         $db->vardump($result);
     }
+    return $result;
+}
+
+function getEmployeeByEmployeeId($emp_id) {
+    $db = getDb();
+
+    $query = "SELECT * FROM DtEmployee WHERE employeeid='1045';";
+    $result = $db->get_row($query);
     return $result;
 }

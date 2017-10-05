@@ -1,12 +1,16 @@
 <?php
 
-function successRespone($data)
+function successRespone($data, $message = "")
 {
     $res=array();
     $res["success"]=true;
-    $res["errorMessage"]=null;
-    $mcrypt = new MCrypt();
-    $res["data"]=$mcrypt->encrypt($data);
+    $res["message"]=$message;
+    if ($data && $data!="") {
+        $mcrypt = new MCrypt();
+        $res["data"]=$mcrypt->encrypt($data);
+    } else {
+        $res["data"]=null;
+    }
     return (object)$res;
 }
 
@@ -14,7 +18,7 @@ function errorRespone($errorMessage)
 {
     $res=array();
     $res["success"]=false;
-    $res["errorMessage"]=$errorMessage;
+    $res["message"]=$errorMessage;
     $res["data"]=null;
     return (object)$res;
 }
