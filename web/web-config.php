@@ -24,5 +24,7 @@ if (!defined('ABSPATH'))
 
 require_once(ABSPATH . '/system.web/server_utility.php');
 require_once(ABSPATH . '/system.web/file_upload.php');
+require_once(ABSPATH . '/system.web/MCrypt.php');
+require_once(ABSPATH . '/system.web/ApiResponse.php');
 require_once(ABSPATH . '/lib/db_helper/shared/ez_sql_core.php');
 require_once(ABSPATH . '/lib/db_helper/sqlite/ez_sql_sqlite3.php');
