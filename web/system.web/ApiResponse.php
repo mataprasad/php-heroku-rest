@@ -22,3 +22,11 @@ function errorRespone($errorMessage)
     $res["data"]=null;
     return (object)$res;
 }
+
+function decodePayload($pay_load)
+{
+    $mcrypt = new MCrypt();
+    $model = json_decode($mcrypt->decrypt($pay_load));
+    $mcrypt=null;
+    return $model;
+}

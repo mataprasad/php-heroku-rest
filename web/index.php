@@ -32,8 +32,9 @@ $app->before(function (Request $request) use ($app) {
     if (0 === strpos($request->headers->get('Content-Type'), 'application/json')) {
         $data = json_decode($request->getContent(), true);
         $final_data=is_array($data) ? $data : array();
-        //$mcrypt = new MCrypt();
-        //$final_data["authorization"]=$mcrypt->decrypt(str_replace("Basic ","",$headers["authorization"][0]));
+        if (isset($headers["authorization"])) {
+            $final_data["authorization"]=decodePayload(str_replace("Basic ", "", $headers["authorization"][0]));
+        }
         $request->request->replace($final_data);
     }
 });
@@ -46,10 +47,11 @@ $app->before(function (Request $request) use ($app) {
  */
 
 $app->get('/', function (Request $request) use ($app) {
-    
-    $mcrypt = new MCrypt();
-    $mcrypt->decrypt("mata");
-   
+    /*
+    $token="56642fe5fc6bb45823ac30cda66861bedb9aeea35ca368a380f58da80b3472b1705eaf0c1e197e63c64837a61620d4fd5d4209c691b350b91bc4aa3b56d1f746183a57e90c07e192ef87a7e2fd5ce588f392f9d331cb1e135eedb586cde07923f9abbe4afda6a275e32d88160a955790de9df26b471d3ddd8f5d241284274016f950993b7e1d27374e3ff26b6fc8529784976e6e591fe7d0e2016b8a914bedac0142ee937f707f518500655879fc7f807e78de99009d3b6b7002a3670e7e6124703de12aff63196d38f8116de8d2ddf463feb0cbb9336da17d94429e259e513cdd98eae43361c36153f966bdb8122d53";
+    return $app->json(decodePayload($token),200);
+    return $app->json(successRespone(json_encode((object)$token), "Device registered successfully."), 200);
+    */
     return $app->json("I am up and running. Current Time at Server : ".date(DATE_ATOM), 200);
 });
 
@@ -62,19 +64,29 @@ $app->get('/', function (Request $request) use ($app) {
  */
 $app->post('/api/register', function (Request $request) use ($app) {
     
-    $pay_load = $request->request->get('pay_load');
-
-    $mcrypt = new MCrypt();
-    $model = json_decode($mcrypt->decrypt($pay_load));
+    $model = decodePayload ($request->request->get('pay_load'));
        
     $emp=getEmployeeByEmployeeId($model->employeeId);
-    //var_dump($emp);
-    /*if ($emp!=null && $emp->EmployeeID==$model->employeeId) {
-        
+    
+    if ($emp!=null && $emp->EmployeeID==$model->employeeId) {
+        $serverKey=GET_GUID();
+        $success = updateEmployeeDeviceRegistration($serverKey,$model->mobileNumber, $model->email, $model->pin, $model->imeiNumber, $model->employeeId, $emp->ID);
+        if ($success) {
+            $token=array();
+            $token["name"]=$emp->FirstName." ".$emp->LastName;
+            $token["employeeId"]=$model->employeeId;
+            $token["email"]=$model->email;
+            $token["mobile"]=$model->mobileNumber;
+            $token["imeiNumber"]=$model->imeiNumber;
+            $token["serverKey"]=$serverKey;
+            $token["pin"]=$model->pin;
+            $token["expiry"]=date(DATE_ATOM,strtotime('+30 days', time()));
+            return $app->json(successRespone(json_encode((object)$token), "Device registered successfully."), 200);
+        }
     } else {
         return $app->json(errorRespone("Employee id '".$model->employeeId."' is not available in the system."), 400);
-    }*/
-    return $app->json(successRespone(null, "Created Successfully.".$emp->ID), 200);
+    }
+    return $app->json(errorRespone("Internal Server Error.Please try after some time"), 500);
 });
 
 /**
