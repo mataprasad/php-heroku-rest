@@ -14,13 +14,14 @@ use Symfony\Component\HttpFoundation\Response;
 $app = new Silex\Application();
 
 $app->before(function (Request $request) use ($app) {
+    $headers=getallheaders();
     $allow_access=true;
-    $headers = $request->headers->all();
+    //$headers = $request->headers->all();
     if (!($request->getPathInfo()=="/api/register" || $request->getPathInfo()=="/")) {
-        if (!isset($headers["authorization"])) {
+        if (!isset($headers["Authorization"])) {
             $allow_access=false;
         } else {
-            $auth = $headers["authorization"][0];
+            $auth = $headers["Authorization"][0];
             if ($auth==null || $auth=="") {
                 $allow_access=false;
             }
@@ -32,8 +33,8 @@ $app->before(function (Request $request) use ($app) {
     if (0 === strpos($request->headers->get('Content-Type'), 'application/json')) {
         $data = json_decode($request->getContent(), true);
         $final_data=is_array($data) ? $data : array();
-        if (isset($headers["authorization"])) {
-            $final_data["authorization"]=decodePayload(str_replace("Basic ", "", $headers["authorization"][0]));
+        if (isset($headers["Authorization"])) {
+            $final_data["authorization"]=decodePayload(str_replace("Basic ", "", $headers["Authorization"][0]));
         }
         $request->request->replace($final_data);
     }
@@ -64,27 +65,32 @@ $app->get('/', function (Request $request) use ($app) {
  */
 $app->post('/api/register', function (Request $request) use ($app) {
     
-    $model = decodePayload ($request->request->get('pay_load'));
-       
-    $emp=getEmployeeByEmployeeId($model->employeeId);
-    
-    if ($emp!=null && $emp->EmployeeID==$model->employeeId) {
-        $serverKey=GET_GUID();
-        $success = updateEmployeeDeviceRegistration($serverKey,$model->mobileNumber, $model->email, $model->pin, $model->imeiNumber, $model->employeeId, $emp->ID);
-        if ($success) {
-            $token=array();
-            $token["name"]=$emp->FirstName." ".$emp->LastName;
-            $token["employeeId"]=$model->employeeId;
-            $token["email"]=$model->email;
-            $token["mobile"]=$model->mobileNumber;
-            $token["imeiNumber"]=$model->imeiNumber;
-            $token["serverKey"]=$serverKey;
-            $token["pin"]=$model->pin;
-            $token["expiry"]=date(DATE_ATOM,strtotime('+30 days', time()));
-            return $app->json(successRespone(json_encode((object)$token), "Device registered successfully."), 200);
-        }
-    } else {
-        return $app->json(errorRespone("Employee id '".$model->employeeId."' is not available in the system."), 400);
+    try{
+     $model = decodePayload ($request->request->get('pay_load'));
+        
+     $emp=getEmployeeByEmployeeId($model->employeeId);
+     
+     if ($emp!=null && $emp->EmployeeID==$model->employeeId) {
+         $serverKey=GET_GUID();
+         $success = updateEmployeeDeviceRegistration($serverKey,$model->mobileNumber, $model->email, $model->pin, $model->imeiNumber, $model->employeeId, $emp->ID);
+         if ($success) {
+             $token=array();
+             $token["name"]=$emp->FirstName." ".$emp->LastName;
+             $token["employeeId"]=$model->employeeId;
+             $token["email"]=$model->email;
+             $token["mobile"]=$model->mobileNumber;
+             $token["imeiNumber"]=$model->imeiNumber;
+             $token["serverKey"]=$serverKey;
+             $token["pin"]=$model->pin;
+             $token["expiry"]=date(DATE_ATOM,strtotime('+30 days', time()));
+             return $app->json(successRespone(json_encode((object)$token), "Device registered successfully."), 200);
+         }
+     } else {
+         return $app->json(errorRespone("Employee id '".$model->employeeId."' is not available in the system."), 400);
+     }
+    }
+    catch(Exception $ex){
+
     }
     return $app->json(errorRespone("Internal Server Error.Please try after some time"), 500);
 });
@@ -155,7 +161,19 @@ $app->get('/api/get-pin/{emp_id}', function (Request $request, $emp_id) use ($ap
 });
 
 $app->get('/api/load-locations/{for_dt}/{emp_id}', function (Request $request, $for_dt, $emp_id) use ($app) {
-    return $app->json((object)array("Ok"), 200);
+    try{
+        //$model = decodePayload ($request->request->get('pay_load'));
+        $locations=getTodayLocationsForDate($emp_id,$for_dt);
+        if ($locations!=null && sizeof($locations)>0) {
+            return $app->json(successRespone(json_encode($locations),"Success."), 200);
+        } else {
+            return $app->json(errorRespone("No records found."), 400);
+        }
+       }
+       catch(Exception $ex){
+   
+       }
+       return $app->json(errorRespone("Internal Server Error.Please try after some time"), 500);
 });
 
 $app->get('/api/history/{from}/{to}/{emp_id}', function (Request $request, $from, $to, $emp_id) use ($app) {

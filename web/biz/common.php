@@ -38,3 +38,15 @@ function updateEmployeeDeviceRegistration($serverKey,$mobileNumber,$email,$pin,$
 
     return $success;
 }
+
+function getTodayLocationsForDate($emp_id,$date)
+{
+    $db = getDb();
+    
+    $sql ="SELECT A.*,B.Lat AS GeoLat,B.Lng AS GeoLng,B.LocationName
+    FROM DtEmployeeLocationForDay A JOIN DtLocationMaster B
+    ON A.LocationID = B.ID WHERE ForDate='".$date."' AND EmployeeID='".$emp_id."';";
+    $data=$db->get_results($sql);
+
+    return $data;
+}
